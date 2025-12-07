@@ -1,0 +1,64 @@
+import numpy as np
+import matplotlib.pyplot as plt
+
+# Chargargement des données 
+#data_32 = np.loadtxt('les_Re1600_N32_cfl03_tf15.dat')
+data_64 = np.loadtxt('les_Re1600_N64_cfl03_tf15.dat')
+data_128 = np.loadtxt('les_Re1600_N128_cfl03_tf15.dat')
+data_256 = np.loadtxt('les_Re1600_N256_cfl03_tf15.dat') 
+
+
+#to compute dns date with sqrt(2) in strain rate magnitude 
+
+# Physical parameter
+Re = 1600.0
+nu = 1.0 / Re
+
+#Chargement des données  DNS 
+dnsdata_256 = np.loadtxt('/home/pove/Téléchargements/notus_run_boris/tgv3d/dns/re1600/o2_centered_o2_centered/nu_exact/log.Re1600_N256_cfl03_tf15.dat')
+
+
+
+# Extraction des colonnes 
+#time_32, MeanKEDR_32 = data_32[:, 0], data_32[:, 2]
+time_64 , MeanKEDR_64 , nu64 , pk64 = data_64[:, 0] , data_64[:, 2] , data_64[:, 4] , data_64[:, 5]
+time_128, MeanKEDR_128, nu128, pk128 = data_128[:, 0], data_128[:, 2], data_128[:, 4] , data_128[:, 5]
+time_256, MeanKEDR_256 = data_256[:, 0], data_256[:, 2]
+
+dnstime_256, dnsMeanKEDR_256, dnsfMeanKEDR_256 = dnsdata_256[:, 0], dnsdata_256[:, 2], dnsdata_256[:, 4]
+
+# compute  S:S for dns filtered velocity 
+S_S_dns_filtered = dnsfMeanKEDR_256 / (2 * nu) 
+# Compute  ε_sgs_exact
+epsilon_sgs_exact = dnsMeanKEDR_256 - dnsfMeanKEDR_256 
+
+
+
+plt.figure(1, figsize=(7, 7))
+
+plt.plot(time_64, MeanKEDR_64,color='C0', label=r'$\overline{\Delta}_{0} = \Delta x_0 = \frac{2\pi}{64}$, $64^3$')
+plt.plot(time_128, MeanKEDR_128,color='C1', label=r'$\Delta x_1 = \frac{\Delta x_0}{2}$, $128^3$')
+plt.plot(time_256, MeanKEDR_256,color='C2', label=r'$ \Delta x_2 = \frac{\Delta x_0}{4}$, $256^3$')
+plt.plot(dnstime_256, dnsfMeanKEDR_256,'r-.', label=r'$2\nu\bar{S}_{ij}\bar{S}_{ij}$(dns$256^3 $)')
+
+
+plt.xlabel('$temps(s)$',fontsize=18)
+#plt.ylabel(r'$< 2\nu\bar{S}_{ij}\bar{S}_{ij}>$',fontsize=18)
+plt.ylabel(r'$< 2\nu\,\overline{S}_{ij}\,\overline{S}_{ij} >$', fontsize=15)
+plt.legend(loc = 'upper left',fontsize=10,frameon=True, borderpad=1.5, handletextpad=1.5,
+           markerscale=2, edgecolor='black', framealpha=1)
+
+# Ajout d'une flèche oblique au centre de la figure
+plt.annotate(
+    '',
+    xy=(0.70, 0.75),      # pointe de la flèche
+    xytext=(0.45, 0.30),  # début de la flèche
+    xycoords='axes fraction',
+    arrowprops=dict(arrowstyle='->', linewidth=2, color='black')
+)
+
+
+plt.figure(1)
+plt.savefig('mean_kedr_les_mm_revolved_fields_2pi_64.png')
+
+plt.show()
